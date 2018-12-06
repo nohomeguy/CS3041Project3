@@ -1,0 +1,197 @@
+<html>
+<head>
+ <script src="https://download.affectiva.com/js/3.2/affdex.js"></script>
+ <style>
+ #emoji { font-size:10em; }
+ video { display:none }
+</style>
+</head>
+<center><div>
+ <font style="font-family:merriweather;" size="12">Meal Selector</font>
+</div></center>
+<center><div style="padding-top: 35px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px" id="player"></center></div>
+<body bgcolor="#E6E6FA" background="http://www.bachmansinc.com/wp-content/themes/metrocorp/assets/images/patterns/pattern_rad.png
+http://www.bachmansinc.com/wp-content/themes/metrocorp/assets/images/patterns/pattern_rad.png
+">
+ <div id='video'></div>
+ <div id='emoji'></div>
+ <div id='meal'>
+     <font style="font-family:verdana;" size="3"><b>Your Selected Meal is: </b></font>
+     <div id='selection'></div>
+ </div>
+</body>
+<script>
+
+  const videoWidth = 640, videoHeight = 480
+  const faceMode = affdex.FaceDetectorMode.LARGE_FACES
+  const timeInterval = 3;
+
+  const detector = new affdex.CameraDetector(
+  document.querySelector('#video'),
+  videoWidth, videoHeight, faceMode
+  )
+
+  detector.detectAllExpressions();
+  detector.detectAllEmotions();
+  detector.detectAllEmojis();
+  detector.detectAllAppearance();
+  detector.detectEmotions.joy = true;
+
+  var tag = document.createElement('script');
+
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  // 3. This function creates an <iframe> (and YouTube player)
+  //    after the API code downloads.
+  var player;
+  var interval = 1;
+  var selectedMeal = "No Meal";
+  var emotion = 0;
+  var currMax = 0;
+  var i = 1
+
+  /*window.onload = function() {
+
+    /*detector.addEventListener( 'onImageResultsSuccess', function( faces ) {
+    if( faces.length > 0 ) {
+      document.querySelector('#emoji').innerText = faces[0].emojis.dominantEmoji
+    }
+  })
+  }*/
+
+  function reset(){
+    console.log("IN reset()")
+    if(emotion > currMax){
+        currMax = emotion;
+        interval = i;
+    }
+    console.log("END reset() - " + "i: " + i + " emotion: " + emotion);
+    emotion = 0; //reset emotion score
+    i+= 1; //increment interval
+  }
+
+  detector.addEventListener( 'onImageResultsSuccess', function(faces) {
+      //Get a canvas element from DOM
+      /*var aCanvas = document.getElementById("canvas");
+      var context = aCanvas.getContext('2d');
+
+      //Cache the timestamp of the first frame processed
+      var startTimestamp = (new Date()).getTime() / 1000;
+
+      //Get imageData object.
+      var imageData = context.getImageData(0, 0, 640, 480);
+
+      //Get current time in seconds
+      var now = (new Date()).getTime() / 1000;
+
+      //Get delta time between the first frame and the current frame.
+      var deltaTime = now - startTimestamp;
+
+      //Process the frame
+      detector.process(imageData, deltaTime);*/
+
+      emotion += faces[0].emotions.joy;
+      console.log("in playback: " + emotion);
+
+      //if( faces.length > 0 ) { }
+    })
+
+    function print(){
+      console.log("in print - " + interval);
+      interval = Math.floor((Math.random() * 10) + 1);
+      switch(interval){
+        case 1:
+        selectedMeal = "Oatmeal";
+        break;
+        case 2:
+        selectedMeal = "Pancakes";
+        break;
+        case 3:
+        selectedMeal = "Egg Sandwhich";
+        break;
+        case 4:
+        selectedMeal = "Salad";
+        break;
+        case 5:
+        selectedMeal = "Soup";
+        break;
+        case 6:
+        selectedMeal = "Burrito";
+        break;
+        case 7:
+        selectedMeal = "Chicken and Potatoes";
+        break;
+        case 8:
+        selectedMeal = "Pasta";
+        break;
+        case 9:
+        selectedMeal = "Steak";
+        break;
+        case 10:
+        selectedMeal = "Chicken Pasta";
+        break;
+      }
+
+      document.querySelector('#selection').innerText = selectedMeal;
+    }
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '585',
+        width: '960',
+        videoId: 'x7aXkUOKVAM',
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    // 4. The API will call this function when the video player is ready.
+    function onPlayerReady(event) {
+      window.alert("YouTube video is ready");
+      //detector.start();
+    }
+
+
+    // 5. The API calls this function when the player's state changes.
+    //    The function indicates that when playing a video (state=1),
+    //    the player should play for six seconds and then stop.
+    var done = false;
+    var myVar;
+    var unstarted = true;
+    function onPlayerStateChange(event) {
+
+      if(event.data == YT.PlayerState.UNSTARTED && unstarted){
+        console.log("UNSTARTED");
+        event.target.playVideo();
+        detector.start();
+        myVar = setInterval(reset(), 3000);
+        unstarted = false;   
+      }
+
+      //resetLoop()
+
+      }
+      if(event.data == YT.PlayerState.ENDED){
+        console.log("ENDED");
+        stop();
+      }
+      /*if (event.data == YT.PlayerState.PLAYING && !done) {
+        setTimeout(stopVideo, 0000);
+       done = true;
+      }*/
+      
+    
+
+  function stop() {
+    player.stopVideo();
+    detector.stop();
+    //clearInterval(myVar);
+    print();
+  }
+    
+  </script>
+  </html>
